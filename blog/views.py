@@ -55,3 +55,18 @@ def post_new_form(request):
     else:
         form = PostForm()
     return render(request,'blog/post_form.html',{'form':form})
+
+#글수정 ModelForm 사용
+def post_edit(request,pk):
+    post = get_object_or_404(Post,pk=pk)
+    if request.method == 'POST':
+        form = PostModelForm(request.POST,instance=post)
+        if form.is_valid():
+            post = form.save(commit=False)
+            post.author = request.user
+            post.published_date = timezone.now()
+            post.save()
+            return redirect('post_detail',pk=post.pk)
+    else:
+        form = PostModelForm(instance=post)
+    return render(request,'blog/post_edit.html',{'form':form})
