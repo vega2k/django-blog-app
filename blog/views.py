@@ -1,9 +1,11 @@
+from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
 from django.shortcuts import render, get_object_or_404, redirect
 from django.utils import timezone
 
-from blog.modelforms import PostModelForm, PostForm
-from .models import Post
+from blog.modelforms import PostModelForm, PostForm, CommentForm
+from .models import Post, Comment
+
 
 # 글목록 조회
 def post_list(request):
@@ -57,6 +59,7 @@ def post_new_form(request):
     return render(request,'blog/post_form.html',{'form':form})
 
 #글수정 ModelForm 사용
+@login_required
 def post_edit(request,pk):
     post = get_object_or_404(Post,pk=pk)
     if request.method == 'POST':
@@ -70,3 +73,29 @@ def post_edit(request,pk):
     else:
         form = PostModelForm(instance=post)
     return render(request,'blog/post_edit.html',{'form':form})
+
+def add_comment_to_post(request, pk):
+    post = get_object_or_404(Post, pk=pk)
+    if request.method== "POST":
+        form = CommentForm(request.POST)
+        if form.is_valid():
+            comment = form.save(commit=False)
+            comment.post= post
+            comment.save()
+            return redirect('post_detail', pk=post.pk)
+    else:
+        form = CommentForm()
+    return render(request, 'blog/add_comment_to_post.html', {'form': form})
+
+@login_required
+def comment_approve(request, pk):
+    comment = get_object_or_404(Comment, pk=pk)
+    comment.approve()
+    return redirect('post_detail', pk=comment.post.pk)
+
+@login_required
+def comment_remove(request, pk):
+    comment = get_object_or_404(Comment, pk=pk)
+    post_pk= comment.post.pk
+    comment.delete()
+    return redirect('post_detail', pk=post_pk)

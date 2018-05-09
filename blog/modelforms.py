@@ -1,5 +1,5 @@
 from django import forms
-from .models import Post
+from .models import Post, Comment
 
 
 #validator 함수 정의
@@ -17,3 +17,9 @@ class PostModelForm(forms.ModelForm):
 class PostForm(forms.Form):
     title = forms.CharField(validators=[min_length_3_validator])
     text = forms.CharField(widget=forms.Textarea)
+
+
+class CommentForm(forms.ModelForm):
+    class Meta:
+        model = Comment
+        fields = ('author', 'text',)
