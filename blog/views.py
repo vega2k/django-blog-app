@@ -41,10 +41,14 @@ def post_new_form(request):
         #print(form)
         if form.is_valid():
             print(form.cleaned_data)
-            post = Post(author=request.user,
-                        title=form.cleaned_data['title'],text=form.cleaned_data['text'],published_date=timezone.now()
-                        )
-            post.save()
+            #방법1 : Post객체 생성, save() 호출
+            # post = Post(author=request.user,
+            #             title=form.cleaned_data['title'],text=form.cleaned_data['text'],published_date=timezone.now()
+            #             )
+            # post.save()
+            #방법2 : Post.objects.create() 호출
+            post = Post.objects.create(author=request.user,
+                        title=form.cleaned_data['title'],text=form.cleaned_data['text'],published_date=timezone.now())
             return redirect('post_detail',pk=post.pk)
         else:   #검증실패
             print(form.errors)
